@@ -1,0 +1,8 @@
++ typescript@4.1.3
+added 1 package from 1 contributor, removed 3 packages and audited 1318 packages in 29.428s
+
+57 packages are looking for funding
+  run `npm fund` for details
+
+found 3 low severity vulnerabilities
+  run `npm audit fix` to fix them, or `npm audit` for details
