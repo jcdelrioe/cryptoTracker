@@ -1,10 +1,20 @@
 import React, {Component} from 'react';
-import {View, Image, Text, SectionList, StyleSheet} from 'react-native';
-import Colors from '../../res/colors';
+import {
+  View,
+  Image,
+  Text,
+  FlatList,
+  SectionList,
+  StyleSheet,
+} from 'react-native';
+import Colors from 'cryptoTracker/src/res/colors';
+import Http from 'cryptoTracker/src/libs/http';
+import CoinMarketItem from './CoinMarketItem';
 
 class CoinDetailScreen extends Component {
   state = {
     coin: {},
+    markets: [],
   };
 
   getSymbolIcon = (name) => {
@@ -32,15 +42,24 @@ class CoinDetailScreen extends Component {
     ];
     return sections;
   };
+
+  getMarkets = async (coinId) => {
+    const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
+    const markets = await Http.instance.get(url);
+    this.setState({markets});
+  };
+
   componentDidMount() {
     const {coin} = this.props.route.params;
 
     this.props.navigation.setOptions({title: coin.symbol});
 
+    this.getMarkets(coin.id);
+
     this.setState({coin});
   }
   render() {
-    const {coin} = this.state;
+    const {coin, markets} = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.subHeader}>
@@ -51,6 +70,7 @@ class CoinDetailScreen extends Component {
           <Text style={styles.titleText}>{coin.name}</Text>
         </View>
         <SectionList
+          style={styles.section}
           sections={this.getSections(coin)}
           keyExtractor={(item) => item}
           renderItem={({item}) => (
@@ -63,6 +83,14 @@ class CoinDetailScreen extends Component {
               <Text style={styles.sectionText}>{section.title}</Text>
             </View>
           )}
+        />
+
+        <Text style={styles.marketsTitle}>Markets</Text>
+        <FlatList
+          style={styles.list}
+          horizontal={true}
+          data={markets}
+          renderItem={({item}) => <CoinMarketItem item={item} />}
         />
       </View>
     );
@@ -90,6 +118,13 @@ const styles = StyleSheet.create({
     width: 25,
     height: 25,
   },
+  section: {
+    maxHeight: 220,
+  },
+  list: {
+    maxHeight: 100,
+    paddingLeft: 16,
+  },
   sectionHeader: {
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     padding: 8,
@@ -105,6 +140,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  marketsTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    marginLeft: 16,
   },
 });
 
